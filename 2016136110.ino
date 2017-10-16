@@ -1,20 +1,20 @@
-#define Up_R 1 //»ó ½ÅÈ£µî
-#define Up_Y 2
-#define Up_G 3 
-#define Do_R 4 //ÇÏ ½ÅÈ£µî
+#define Up_R 25 //ìƒ ì‹ í˜¸ë“±
+#define Up_Y 26
+#define Up_G 27
+#define Do_R 4 //í•˜ ì‹ í˜¸ë“±
 #define Do_Y 5
 #define Do_G 6
-#define Le_R 7 // ÁÂ ½ÅÈ£µî
+#define Le_R 7 // ì¢Œ ì‹ í˜¸ë“±
 #define Le_Y 8
 #define Le_G 9
-#define Ri_R 10 // ¿ì ½ÅÈ£µî
-#define Ri_Y 11
-#define Ri_G 12 
-#define Button_A 13 // ½ºÀ§Ä¡
-int interval = 40000; //40ÃÊ
-volatile bool state = true; //½ºÀ§Ä¡ º¯¼ö, ´©¸¦ ½Ã false
+#define Ri_R 22 // ìš° ì‹ í˜¸ë“±
+#define Ri_Y 23
+#define Ri_G 24 
+#define Button_A 2 // ìŠ¤ìœ„ì¹˜
+int delaytime = 10000; //40ì´ˆ
+volatile bool state = true; //ìŠ¤ìœ„ì¹˜ ë³€ìˆ˜, ëˆ„ë¥¼ ì‹œ false
 
-void setup() {  // OUTPUT ¼¼ÆÃ
+void setup() {  // OUTPUT ì„¸íŒ…
   pinMode(Up_R, OUTPUT);
   pinMode(Up_G, OUTPUT);
   pinMode(Up_Y, OUTPUT);
@@ -27,94 +27,94 @@ void setup() {  // OUTPUT ¼¼ÆÃ
   pinMode(Ri_R, OUTPUT);
   pinMode(Ri_G, OUTPUT);
   pinMode(Ri_Y, OUTPUT);
-  pinMode(Button_A, INPUT_PULLUP); //±âº»°ª HIGH input°ú´Â ´Ù¸£°Ô ÇÁ·Î¼¼¼­ ³»ºÎ ÀúÇ×À» »ç¿ë
-  attachInterrupt(0,Botton, FALLING); //ÀÎÅÍ·´Æ®0, 0¹ø ÇÉÀ¸·Î ÀÎÅÍ·´Æ® Ã³¸®, FALLINGÀº ½ÅÈ£°¡ high¿¡¼­ low°¡ µÉ¶§ ½ÇÇà½ÃÅ°°Ú´ÙÀÇ ¶æ
-}                               //Áï ÀÎÅÍ·´Æ® ÇÉÀÇ °ªÀÌ HIGH¿¡¼­ LOW·Î ¹Ù²ğ ¶§ ÇÔ¼öBotton ½ÇÇà
-                                 //ÀÎÅÍ·´Æ®´Â ÁöÁ¤µÈ ÇÉÀÇ ÇöÀç »óÅÂ°¡ ¾î¶»°Ô º¯ÇÏ´À³Ä¿¡ µû¶ó °áÁ¤µÇ°í, ÀÎÅÍ·´Æ®°¡ ¹ß»ıµÆ´Ù¸é loop()¾ÈÀÇ ÄÚµå ½ÇÇàÀÌ Áß´ÜµÇ°í ÀÎÅÍ·´Æ®·Î ÁöÁ¤µÈ ÇÔ¼ö°¡ ½ÇÇàµÊ.
+  pinMode(Button_A, INPUT_PULLUP); //ê¸°ë³¸ê°’ HIGH inputê³¼ëŠ” ë‹¤ë¥´ê²Œ í”„ë¡œì„¸ì„œ ë‚´ë¶€ ì €í•­ì„ ì‚¬ìš©
+  attachInterrupt(0,Botton, FALLING); // ì¸í„°ëŸ½íŠ¸ 0 ì€ í•€ 2ì— ìƒí˜¸ì‘ìš© ë”°ë¼ì„œ ìŠ¤ìœ„ì¹˜ë¥¼ 2ë²ˆì— ë‹¬ê²ƒ
+}
 
 void loop() {
 // -----------------------------------------------------
-//¼ø¼­´Â »ó-ÇÏ-ÁÂ-¿ì
+//ìˆœì„œëŠ” ìƒ-í•˜-ì¢Œ-ìš°
 // -----------------------------------------------------
 
 
-//------------¸ÇÃ³À½, »ó ½ÅÈ£µî¸¸ ÃÊ·Ï»ö ----------------  
+//------------ë§¨ì²˜ìŒ, ìƒ ì‹ í˜¸ë“±ë§Œ ì´ˆë¡ìƒ‰ ----------------  
 digitalWrite(Le_R, HIGH);
 digitalWrite(Ri_R, HIGH);
 digitalWrite(Do_R, HIGH);
 digitalWrite(Up_R, LOW);
 digitalWrite(Up_G, HIGH);
-delay(40000); //40ÃÊ µ¿¾È À¯Áö
-//------------------------------------------------------
-digitalWrite(Up_G, LOW); // »ó ½ÅÈ£µî ÃÊ·Ï»ö ²¨Áü
+delay(delaytime); //40ì´ˆ ë™ì•ˆ ìœ ì§€
+//------------------------------------------------------.
+digitalWrite(Up_G, LOW); // ìƒ ì‹ í˜¸ë“± ì´ˆë¡ìƒ‰ êº¼ì§
 
-// -------------ÃÊ·Ï»ö -> »¡°£»ö µÉ¶§ ------------------------
+// -------------ì´ˆë¡ìƒ‰ -> ë¹¨ê°„ìƒ‰ ë ë•Œ ------------------------
 Yellow(Up_Y);
 // --------------------------------------------------------
-// ---------------------ÇÏ ½ÅÈ£µî »¡°£ºÒÀÌ ÃÊ·ÏºÒ·Î ¹Ù²ñ------------------------
+// ---------------------í•˜ ì‹ í˜¸ë“± ë¹¨ê°„ë¶ˆì´ ì´ˆë¡ë¶ˆë¡œ ë°”ë€œ------------------------
 digitalWrite(Up_R, HIGH); 
 digitalWrite(Do_R, LOW);
 digitalWrite(Do_G, HIGH); 
 // ------------------------------------------------------------------------------
 
-unsigned long currentMillis = millis(); // ÇöÀç½Ã°¢ Ã¼Å©, millis() ÇÔ¼ö°¡ ÇöÀç½Ã°£(¾ÆµÎÀÌ³ë°¡ ½ÃÀÛµÈ ÈÄºÎÅÍ °æ°úµÈ ½Ã°£)À» ¹Ğ¸®ÃÊ ´ÜÀ§·Î(1/1000 ÃÊ) ¸®ÅÏ
-while(millis() - currentMillis <= interval) { // ¾ÕÀ¸·Î 40ÃÊµ¿¾È ¹İº¹
- if(state == false) { //½ºÀ§Ä¡°¡ ´­·ÈÀ¸¸é
-    delay(3000); //3ÃÊ ´ë±â
-    digitalWrite(Do_G, LOW); // ÇÏ ½ÅÈ£µî ÃÊ·ÏºÒÀ» ²¨ÁØ´Ù
-    Yellow(Do_Y); // ÇÏ ½ÅÈ£µî ³ë¶õºÒ Á¡¸ê
-    digitalWrite(Do_R, HIGH); // ÇÏ ½ÅÈ£µî »¡°£ºÒÀ» ÄÒ´Ù
-    state = true; // »óÅÂ¸¦ Ã³À½ÀÇ ture ·Î ¹Ù²ãÁÜ
+for(int count=0; count<1000;count++) { // ì•ìœ¼ë¡œ 10ì´ˆë™ì•ˆ ë°˜ë³µ
+ if(state == false) { //ìŠ¤ìœ„ì¹˜ê°€ ëˆŒë ¸ìœ¼ë©´
+    delay(1000); //3ì´ˆ ëŒ€ê¸°
+    digitalWrite(Do_G, LOW); // í•˜ ì‹ í˜¸ë“± ì´ˆë¡ë¶ˆì„ êº¼ì¤€ë‹¤
+    Yellow(Do_Y); // í•˜ ì‹ í˜¸ë“± ë…¸ë€ë¶ˆ ì ë©¸
+    digitalWrite(Do_R, HIGH); // í•˜ ì‹ í˜¸ë“± ë¹¨ê°„ë¶ˆì„ ì¼ ë‹¤
+    state = true; // ìƒíƒœë¥¼ ì²˜ìŒì˜ ture ë¡œ ë°”ê¿”ì¤Œ
  }
+ if(count == (delaytime/1000)) break;
+ delay(1000); // ë¬´ì¡°ê±´ ì ìœ¼ë¡œ 10ì´ˆ ê¸°ë‹¤ë¦´ê²ƒ
 }
 
 
-if(digitalRead(Do_G) == HIGH) { //½ºÀ§Ä¡°¡ ´­¸®Áö ¾Ê¾ÒÀ» °æ¿ì ÁøÇà
-    digitalWrite(Do_G, LOW);  // ÇÏ ÃÊ·ÏºÒ ²¨Áü
-    Yellow(Do_Y); // ÇÏ ³ë¶õºÒ Á¡¸ê
-    digitalWrite(Do_R, HIGH); // ÇÏ »¡°£ºÒ ÄÑÁü
-}
-
-
-
-digitalWrite(Do_R, HIGH);  // ÇÏ »¡°£ºÒ ÄÑÁ®ÀÖÀ½
-digitalWrite(Le_R, LOW); // ÁÂ »¡°£ºÒ ²¨Áü
-digitalWrite(Le_G, HIGH); // ÁÂ ½ÅÈ£µî ÃÊ·ÏºÒ¸¸ ÄÑÁü
-delay(40000); //40ÃÊ°£ À¯Áö
-digitalWrite(Le_G, LOW); //ÁÂ ÃÊ·ÏºÒ ²¨Áü
-Yellow(Le_Y); //ÁÂ ³ë¶õºÒ Á¡¸ê
-digitalWrite(Le_R, HIGH); // ÁÂ »¡°£ºÒ ÄÑÁü
-
-
-digitalWrite(Ri_R, LOW); // ¿ì »¡°£ºÒ ²¨Áü
-digitalWrite(Ri_G, HIGH);  // ¿ì ÃÊ·ÏºÒ ÄÑÁü
-delay(40000); 
-digitalWrite(Ri_G, LOW); // ¿ì ÃÊ·ÏºÒ ²¨Áü
-Yellow(Ri_Y); // ¿ì ³ë¶õºÒ Á¡¸ê
-digitalWrite(Ri_G, LOW); // ¿ì ÃÊ·ÏºÒ ²¨Áü
-digitalWrite(Ri_R, HIGH); // ¿ì »¡°£ºÒ ÄÑÁü
-
+if(digitalRead(Do_G) == HIGH) { //ìŠ¤ìœ„ì¹˜ê°€ ëˆŒë¦¬ì§€ ì•Šì•˜ì„ ê²½ìš° ì§„í–‰
+    digitalWrite(Do_G, LOW);  // í•˜ ì´ˆë¡ë¶ˆ êº¼ì§
+    Yellow(Do_Y); // í•˜ ë…¸ë€ë¶ˆ ì ë©¸
+    digitalWrite(Do_R, HIGH); // í•˜ ë¹¨ê°„ë¶ˆ ì¼œì§
 }
 
 
 
+digitalWrite(Do_R, HIGH);  // í•˜ ë¹¨ê°„ë¶ˆ ì¼œì ¸ìˆìŒ
+digitalWrite(Le_R, LOW); // ì¢Œ ë¹¨ê°„ë¶ˆ êº¼ì§
+digitalWrite(Le_G, HIGH); // ì¢Œ ì‹ í˜¸ë“± ì´ˆë¡ë¶ˆë§Œ ì¼œì§
+delay(delaytime); //40ì´ˆê°„ ìœ ì§€
+digitalWrite(Le_G, LOW); //ì¢Œ ì´ˆë¡ë¶ˆ êº¼ì§
+Yellow(Le_Y); //ì¢Œ ë…¸ë€ë¶ˆ ì ë©¸
+digitalWrite(Le_R, HIGH); // ì¢Œ ë¹¨ê°„ë¶ˆ ì¼œì§
 
 
+digitalWrite(Ri_R, LOW); // ìš° ë¹¨ê°„ë¶ˆ êº¼ì§
+digitalWrite(Ri_G, HIGH);  // ìš° ì´ˆë¡ë¶ˆ ì¼œì§
+delay(delaytime); 
+digitalWrite(Ri_G, LOW); // ìš° ì´ˆë¡ë¶ˆ êº¼ì§
+Yellow(Ri_Y); // ìš° ë…¸ë€ë¶ˆ ì ë©¸
+digitalWrite(Ri_G, LOW); // ìš° ì´ˆë¡ë¶ˆ êº¼ì§
+digitalWrite(Ri_R, HIGH); // ìš° ë¹¨ê°„ë¶ˆ ì¼œì§
 
-
-
-
-
-
-//----------------------------------ÇÔ¼öµé--------------------------------
-void Botton(){ //½ºÀ§Ä¡°¡ ´­·ÈÀ» ¶§ ½ÇÇàµÇ´Â ÇÔ¼ö
- if(digitalRead(Do_G) == HIGH) state = false; //½ºÀ§Ä¡°¡ ´­¸®¸é stateÀÇ °ªÀ» ¹Ù²ãÁØ´Ù
 }
 
 
 
 
-void Yellow(const int LED) {  //yellow½ÅÈ£ Á¡¸ê
+
+
+
+
+
+
+
+//----------------------------------í•¨ìˆ˜ë“¤--------------------------------
+void Botton(){ //ìŠ¤ìœ„ì¹˜ê°€ ëˆŒë ¸ì„ ë•Œ ì‹¤í–‰ë˜ëŠ” í•¨ìˆ˜
+ if(digitalRead(Do_G) == HIGH) state = false; //ìŠ¤ìœ„ì¹˜ê°€ ëˆŒë¦¬ë©´ stateì˜ ê°’ì„ ë°”ê¿”ì¤€ë‹¤
+}
+
+
+
+
+void Yellow(const int LED) {  //yellowì‹ í˜¸ ì ë©¸
    for(int i =0; i < 10; i++) {
     digitalWrite(LED, HIGH);
     delay(500);
