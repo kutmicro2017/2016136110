@@ -52,8 +52,9 @@ for(int count=0;count<40;count++){ //40초간 초록불 유지
     Yellow(Up_Y, Do_Y);
     digitalWrite(Up_R, HIGH);
     digitalWrite(Do_R, HIGH); //점멸 후 빨간색
+    delay(10000);
     state = true;
-    if(count>=30){ //30초 이상이 지나있을 경우 for문 빠져나옴
+    if(count>=20){ //20초 이상이 지난 후 누르면 for문 빠져나옴
       break; 
     }
     else{ //30초 이하라면 다시 상하 켜줌
@@ -61,21 +62,23 @@ for(int count=0;count<40;count++){ //40초간 초록불 유지
       digitalWrite(Do_R, LOW);
       digitalWrite(Up_G, HIGH);
       digitalWrite(Do_G, HIGH);
-      count += 10; //10초가 지난만큼 추가
+      count += 20; //20초가 지난만큼 추가
     }
   }
   delay(1000);
 }
-
+digitalWrite(Up_G, LOW);
+digitalWrite(Do_G, LOW);
+Yellow(Up_Y, Do_Y);
+digitalWrite(Up_R, HIGH);
+digitalWrite(Do_R, HIGH);
 digitalWrite(Le_R, LOW);
 digitalWrite(Ri_R, LOW);
 digitalWrite(Le_G, HIGH);
 digitalWrite(Ri_G, HIGH);
-digitalWrite(Do_R, HIGH);
-digitalWrite(Up_R, HIGH);
-digitalWrite(Up_G, LOW);
-digitalWrite(Do_G, LOW);
 delay(delaytime); //40초간 좌우 초록불 온
+digitalWrite(Le_G, LOW);
+digitalWrite(Ri_G, LOW);
 }
 
 
