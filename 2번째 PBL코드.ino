@@ -5,9 +5,13 @@
 #define LeftRight_Y 8
 #define LeftRight_G 9
 #define Button_A 2 // 스위치
-int delaytime = 40000; //40초
-volatile bool state = true; //스위치 변수, 누를 시 false
 
+#define DelayTime 10000 //10초
+#define YellowBlinkTime 3000 //3초
+#define PedestrianDelayTime 3000 //3초
+#define PedestrianMovingTime 10000 //10초
+
+volatile bool state = true; //스위치가 눌렸는지를 판단하는 변수
 
 int walkSignNumber[10][8][4] = {
 
@@ -124,29 +128,28 @@ int walkSignNumber[10][8][4] = {
 
 int signImage[2][8][8] = {
   { //stop
-    { 0, 0, 0, 1, 1, 0, 0, 0},
-    { 0, 0, 1, 0, 0, 1, 0, 0},
-    { 0, 0, 0, 1, 1, 0, 0, 0},
-    { 0, 0, 1, 1, 1, 1, 0, 0},
-    { 0, 1, 0, 1, 1, 0, 1, 0},
-    { 0, 0, 0, 1, 1, 0, 0, 0},
-    { 0, 0, 1, 0, 0, 1, 0, 0},
-    { 0, 0, 1, 0, 0, 1, 0, 0}
+    { 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 1, 1, 0, 0, 1, 1, 0},
+    { 0, 1, 1, 0, 0, 1, 1, 0},
+    { 0, 1, 1, 0, 0, 1, 1, 0},
+    { 0, 1, 1, 0, 0, 1, 1, 0},
+    { 0, 1, 1, 0, 0, 1, 1, 0},
+    { 0, 1, 1, 0, 0, 1, 1, 0},
+    { 0, 0, 0, 0, 0, 0, 0, 0}
   },
 
   { //go
-    { 0, 0, 0, 1, 1, 0, 0, 0},
-    { 0, 0, 1, 0, 0, 1, 0, 0},
-    { 0, 0, 0, 1, 1, 0, 0, 0},
-    { 1, 0, 1, 1, 1, 1, 1, 0},
-    { 0, 1, 0, 1, 1, 0, 0, 1},
-    { 0, 0, 1, 0, 0, 1, 0, 0},
-    { 0, 1, 0, 0, 0, 0, 1, 0},
-    { 0, 0, 1, 0, 0, 0, 0, 1}
+    { 0, 0, 0, 0, 0, 0, 0, 0},
+    { 0, 0, 1, 0, 0, 0, 0, 0},
+    { 0, 0, 1, 1, 0, 0, 0, 0},
+    { 0, 0, 1, 1, 1, 0, 0, 0},
+    { 0, 0, 1, 1, 1, 1, 0, 0},
+    { 0, 0, 1, 1, 1, 0, 0, 0},
+    { 0, 0, 1, 1, 0, 0, 0, 0},
+    { 0, 0, 1, 0, 0, 0, 0, 0}
   }
 
 };
-
 
 int walkPedMatrixCol[] = { 40, 42, 44, 46, 48, 5, 4, 3  };
 int walkPedMatrixRow[] = { 41, 43, 45, 47, 49, 14, 15, 16 }; //숫자 나타내는 도트매트릭스
@@ -157,18 +160,23 @@ int drowSignalRow[] = { 23, 25, 27, 29, 31, 33, 35, 37 }; //아이콘 나타내�
 
 //col에 0v row에 5v가 들어가야 켜짐
 
+void YellowBlink(int pin); //노란불 점멸
+void CleanMatrix();
+void printNumMatrix(int num);
+void printSignalMatrix(int num);
+void CleanSignalMatrix();
+void tTof() { //스위치가 눌렸을 때 실행되는 함수
+  if (digitalRead(UpDown_G) == HIGH) state = false; //스위치가 눌리면 state의 값을 바꿔준다
+}
 
-
-
-void setup() {  // OUTPUT 세팅
-
-
+void setup() {
   pinMode(UpDown_R, OUTPUT);
-  pinMode(UpDown_G, OUTPUT);
   pinMode(UpDown_Y, OUTPUT);
+  pinMode(UpDown_G, OUTPUT);
   pinMode(LeftRight_R, OUTPUT);
-  pinMode(LeftRight_G, OUTPUT);
   pinMode(LeftRight_Y, OUTPUT);
+  pinMode(LeftRight_G, OUTPUT);
+
   for (int i = 0; i < 8; i++) { //핀모드 설정
     pinMode(walkPedMatrixRow[i], OUTPUT);
     pinMode(walkPedMatrixCol[i], OUTPUT);
@@ -177,113 +185,99 @@ void setup() {  // OUTPUT 세팅
     pinMode(drowSignalRow[i], OUTPUT);
     pinMode(drowSignalCol[i], OUTPUT);
   }
-  pinMode(Button_A, INPUT_PULLUP); //기본값 HIGH input과는 다르게 프로세서 내부 저항을 사용
-  attachInterrupt(0,Botton, FALLING); // 인터럽트 0 은 핀 2에 상호작용 따라서 스위치를 2번에 달것
+  pinMode(Button_A, INPUT_PULLUP);
+  attachInterrupt(0, tTof, FALLING);
 }
 
 void loop() {
-// -----------------------------------------------------
-//순서는 상-하-좌-우
-// -----------------------------------------------------
+  digitalWrite(UpDown_G, HIGH); //상하 신호등이 초록색
+  digitalWrite(LeftRight_R, HIGH); //좌우 신호등이 빨간색
+  
+  unsigned long startTime, endTime;
+  startTime = endTime = millis();
+  while (endTime - startTime < DelayTime) { //10초동안 상하 초록불 온
+    printNumMatrix(DelayTime / 1000);
+    printSignalMatrix(0);
+    if (state == false) { //스위치가 눌렸으면
+      state = true;
+      unsigned int pedSignStart, pedSignEnd;
 
-
-//------------맨처음, 상 하 신호등만 초록색 ----------------  
-digitalWrite(LeftRight_R, HIGH);
-digitalWrite(UpDown_R, LOW);
-digitalWrite(UpDown_G, HIGH);
-for(int count=0;count<40;count++){ //40초간 초록불 유지
-   printNumMatrix(delaytime / 1000);
-   printSignalMatrix(0);
-  if(state == false){ //스위치가 눌리면
-    for(int i=0;i<100;i++){
-     //printNumMatrix(delaytime / 1000);
-      //printSignalMatrix(0);
-      delay(10);
+      for(int num = 1; num>0;num--){//1초후에 노란불
+      pedSignStart = pedSignEnd = millis(); 
+      while (pedSignEnd - pedSignStart < 1000 ) {
+        printNumMatrix(DelayTime / 1000);
+        printSignalMatrix(0);
+        pedSignEnd = millis();
+        }
+      }
+      
+      digitalWrite(UpDown_G, LOW); //초록불을 꺼준다
+      YellowBlink(UpDown_Y);
+      digitalWrite(UpDown_R, HIGH); //상하 신호등 빨간색
+      digitalWrite(LeftRight_R, LOW); digitalWrite(LeftRight_G, HIGH); // 좌우는 초록색
+      
+      for (int num = PedestrianMovingTime / 1000; num >= 0; num--) { //보행자신호등
+        pedSignStart = pedSignEnd = millis();
+        while (pedSignEnd - pedSignStart < 1000) { //1초마다 바꿔줌
+          printNumMatrix(num);
+          printSignalMatrix(1);
+          pedSignEnd = millis();
+        }
+      }
+      digitalWrite(LeftRight_G, LOW);
+      YellowBlink(LeftRight_Y);
+      digitalWrite(UpDown_R, LOW); digitalWrite(UpDown_G, HIGH); //상하 신호 다시 초록색
+      digitalWrite(LeftRight_R, HIGH); //좌우 신호 다시 빨간색
+      startTime = millis(); //차량 신호의 길이를 0초부터 다시 시작
     }
-    digitalWrite(UpDown_G, LOW);
-    Yellow(UpDown_Y);
-    for(int i=1000;i>0;i--){
-    digitalWrite(UpDown_R, HIGH);
-    digitalWrite(LeftRight_R, LOW);
-    digitalWrite(LeftRight_G, HIGH);
-     // if(i%100==0){
-        //printNumMatrix(i/100);
-        //printSignalMatrix(1);
-      //}
-      delay(10);
-    }
-    digitalWrite(LeftRight_G, LOW);
-    Yellow(LeftRight_Y);
-    digitalWrite(LeftRight_R, HIGH);
-    digitalWrite(UpDown_R, LOW);
-    digitalWrite(UpDown_G, HIGH);
-    state = true;
-    count=0;
-    continue;
+    endTime = millis();
   }
-  delay(1000);
-}
-digitalWrite(UpDown_G, LOW);
-Yellow(UpDown_Y);
-digitalWrite(UpDown_R, HIGH);
-digitalWrite(LeftRight_R, LOW);
-digitalWrite(LeftRight_G, HIGH);
-for(int i=0;i<4000;i++){
-  //printNumMatrix(delaytime / 1000);
-  //printSignalMatrix(0);
-  delay(10);
-}
-digitalWrite(LeftRight_G, LOW);
-Yellow(LeftRight_Y);
-}
+  
+  digitalWrite(UpDown_G, LOW);
+  YellowBlink(UpDown_Y);
+  digitalWrite(UpDown_R, HIGH); //상하 신호등이 빨간색
+  digitalWrite(LeftRight_R, LOW); digitalWrite(LeftRight_G, HIGH); //좌우 신호등이 초록색
 
-
-
-
-
-
-
-
-
-
-
-//----------------------------------함수들--------------------------------
-void Botton(){ //스위치가 눌렸을 때 실행되는 함수
- if(digitalRead(UpDown_G) == HIGH) state = false; //스위치가 눌리면 state의 값을 바꿔준다
-}
-
-void Yellow(const int LED) {  //yellow신호 점멸
-   //printNumMatrix(delaytime / 1000);
-   //printSignalMatrix(0);
-   for(int i =0;i<5;i++){
-    for(int j =0; j < 50;j++) {
-    //printNumMatrix(delaytime / 1000);
-    //printSignalMatrix(0);
-    digitalWrite(LED, HIGH);
-    delay(10);
-   }
- 
-   for(int j =0; j<50; j++){
-    //printNumMatrix(delaytime / 1000);
-    //printSignalMatrix(0);
-    digitalWrite(LED, LOW);
-    delay(10);
-   }
-   }
-}
-
-void printSignalMatrix(int num) { //정지(0)인지 통행 가능(1)인지 아이콘 출력
-  for (int r = 0; r < 8; r++) {
-    CleanSignalMatrix();
-    digitalWrite(drowSignalRow[r], HIGH);
-    for (int c = 0; c < 8; ++c) {
-      if (signImage[num][r][c]) digitalWrite(drowSignalCol[c], LOW);
+  for (int num = (DelayTime / 1000); num >= 0; num--) { //스위치 안눌렀을경우 보행자신호등
+    unsigned long startTime, endTime;
+    startTime = endTime = millis();
+    while (endTime - startTime < 1000) { //1초마다 바뀜
+      printNumMatrix(num);
+      printSignalMatrix(1);
+      endTime = millis();
     }
-    delay(1);
-    CleanSignalMatrix();
+  }
+  digitalWrite(LeftRight_G, LOW);
+  YellowBlink(LeftRight_Y);
+  digitalWrite(UpDown_R, LOW); //상하 빨간불 꺼줌
+}
+
+//------------------------------------------------------각종 함수
+
+void YellowBlink(int pin) {
+  unsigned long startTime, endTime;
+  startTime = endTime = millis();
+  while (endTime - startTime <= YellowBlinkTime) { //3초동안 깜빡임
+    printNumMatrix(DelayTime / 1000);
+    printSignalMatrix(0);
+    unsigned long blinkStart, blinkEnd;
+    blinkStart = blinkEnd = millis();
+    while (blinkEnd - blinkStart < 500) { //0.5초 켜짐
+      printNumMatrix(DelayTime / 1000);
+      printSignalMatrix(0);
+      digitalWrite(pin, HIGH);
+      blinkEnd = millis();
+    }
+    blinkStart = blinkEnd = millis();
+    while (blinkEnd - blinkStart < 500) { //0,5초 꺼짐
+      printNumMatrix(DelayTime / 1000);
+      printSignalMatrix(0);
+      digitalWrite(pin, LOW);
+      blinkEnd = millis();
+    }
+    endTime = millis();
   }
 }
-
 
 
 void CleanMatrix() { //도트를 모두 끈다
@@ -315,13 +309,14 @@ void printNumMatrix(int num) { //남은 시간 출력
   }
 }
 
-
-
-
-
-
-
-
-
-//----------------------------------------------------------------------------
-
+void printSignalMatrix(int num) { //정지(0)인지 통행 가능(1)인지 아이콘 출력
+  for (int r = 0; r < 8; r++) {
+    CleanSignalMatrix();
+    digitalWrite(drowSignalRow[r], HIGH);
+    for (int c = 0; c < 8; ++c) {
+      if (signImage[num][r][c]) digitalWrite(drowSignalCol[c], LOW);
+    }
+    delay(1);
+    CleanSignalMatrix();
+  }
+}
